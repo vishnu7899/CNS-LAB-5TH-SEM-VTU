@@ -1,36 +1,24 @@
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.Scanner;
-
-public class UDPClient
+import java.io.*;
+import java.net.*;
+class UDPC 
 {
-	public static void main(String[] args) 
-	{
-	Scanner s = new Scanner(System.in);
-	byte buf[] = new byte[1024];
-	try{
-		DatagramSocket clientsocket = new DatagramSocket(5008);
-		DatagramPacket dp = new DatagramPacket(buf, buf.length);
-		Scanner sc = new Scanner(System.in);
-		InetAddress host = InetAddress.getLocalHost();
-		System.out.println("Client is Running... Type 'STOP' to Quit");
-		while(true)
-		{
-			clientsocket.receive(dp);
-			String str = new String(dp.getData(), 0,dp.getLength());
-			if(str.equals("STOP"))
-			{
-			System.out.println("Terminated...");
-			break;
-			}
-			System.out.println("Server: " + str);
-		}
-		
-	   }
-	
-	catch(Exception e) {
-	}
-	}
+public static void main(String args[]) throws Exception
+{
+DatagramSocket clientsocket = new DatagramSocket();
+BufferedReader clientread = new BufferedReader(new InputStreamReader(System.in));
+InetAddress ip=InetAddress.getByName("10.0.6.88");
+byte[] sendbuffer = new byte[1024];
+byte[] receivebuffer = new byte[1024];
+System.out.println("Client\n");
+String clientdata = clientread.readLine();
+sendbuffer = clientdata.getBytes();
+DatagramPacket sendpacket= new DatagramPacket(sendbuffer,sendbuffer.length,ip,9876);
+clientsocket.send(sendpacket);
+DatagramPacket receivepacket = new DatagramPacket(receivebuffer,receivebuffer.length);
+clientsocket.receive(receivepacket);
+String serverdata = new String(receivepacket.getData());
+System.out.println("\nServer msg"+serverdata);
+clientsocket.close();
 }
-
+}
+ 
