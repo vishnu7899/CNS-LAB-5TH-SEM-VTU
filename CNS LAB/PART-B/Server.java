@@ -1,66 +1,32 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
-public class Server {
-public static void main(String args[])throws Exception 
+public class Server
 {
-String filename;
-System.out.println(" enter the file name:");
-Scanner sc=new Scanner(System.in);
-filename=sc.nextLine();
-sc.close();
-while(true)
+public static void main(String args[]) throws Exception
 {
-ServerSocket ss=new ServerSocket(5000);
-System.out.println("waiting for request");
-Socket s=ss.accept();
-System.out.println("Connected with"+s.getInetAddress().toString());
-DataInputStream din=new DataInputStream(s.getInputStream());
-DataOutputStream dout=new DataOutputStream(s.getOutputStream());
-try
+ServerSocket sersock=new ServerSocket(4000);
+System.out.println("server ready for connection");
+Socket sock=sersock.accept();
+System.out.println("waiting for filename");
+InputStream istream=sock.getInputStream();
+BufferedReader br=new BufferedReader(new InputStreamReader(istream));
+String fname=br.readLine();
+OutputStream ostream=sock.getOutputStream();
+PrintWriter pwrite=new PrintWriter(ostream,true);
+String str;
+try{
+BufferedReader contentRead=new BufferedReader(new FileReader(fname));
+while((str=contentRead.readLine())!=null)
 {
-String str="";
-str=din.readUTF();
-System.out.println("sendGet...ok");
-if(!str.equals("stop"))
-System.out.println("Sending file:"+filename);
-dout.writeUTF(filename);
-dout.flush();
-File f=new File(filename);
-FileInputStream fin=new FileInputStream(f);
-long sz=(int)f.length();
-byte b[]=new byte[1024];
-int read;
-dout.writeUTF(Long.toString(sz));
-dout.flush();
-System.out.println("Size:"+sz);
-System.out.println("buff size:"+ss.getReceiveBufferSize());
-while((read=fin.read(b))!=-1)
-{
-dout.write(b,0,read);
-dout.flush();
+pwrite.println(str);
 }
-fin.close();
-System.out.println("..ok");
-dout.flush();
-dout.writeUTF("stop");
-System.out.println("send compelete");
-dout.flush();
+System.out.println("file contents sent successfully");
 }
-catch(Exception e)
+catch(FileNotFoundException e)
 {
-e.printStackTrace();
-System.out.println("an error occured");
+pwrite.println("File not found at server");
+System.out.println("file not found");
 }
-din.close();
-s.close();
-ss.close();
-  }
-   }
+}
 }
