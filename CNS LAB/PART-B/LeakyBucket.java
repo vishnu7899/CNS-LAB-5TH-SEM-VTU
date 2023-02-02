@@ -1,73 +1,52 @@
-import java.io.*;
-
-import java.util.*;
-
-class Queue
-
+import java.util.Scanner;
+import java.lang.*;
+public class lbucket
 {
-int q[],f=0,r=0,size;
-
-void insert(int n)
+public static void main(String[]args)
 {
-Scanner in = new Scanner(System.in);
-q=new int[10];
-for(int i=0;i<n;i++)
+int i;
+int a[]=new int[20];
+int buck_rem=0,buck_cap=4,rate=3,sent,recv;
+Scanner in= new Scanner(System.in);
+System.out.println("Enter the number of packets:");
+int n=in.nextInt();
+System.out.println("Enter the packets:");
+for(i=1;i<=n;i++)
+	a[i]=in.nextInt();
+System.out.println("clock\tpacket size\taccept\tsent\tremaining:");
+for(i=1;i<=n;i++)
 {
-System.out.print("\nEnter " + i + " element: ");
-int ele=in.nextInt();
-if(r+1>10)
+if(a[i]!=0)
 {
-
-System.out.println("\nQueue is full \nLost Packet: "+ele); break;
-
+if(buck_rem+a[i]>buck_cap)
+	recv=-1;
+	else
+{
+recv=a[i];
+buck_rem+=a[i];
+}
+}
+else 
+recv=0;
+if(buck_rem!=0)
+{
+if(buck_rem<rate)
+{
+sent=buck_rem;
+buck_rem=0;
 }
 else
 {
-r++;
-q[i]=ele;
-}
-
+sent=rate;
+buck_rem=buck_rem-rate;
 }
 }
-
-void delete()
-{
-Scanner in = new Scanner(System.in);
-Thread t=new Thread();
-
-if(r==0)
-System.out.print("\nQueue empty ");
 else
-{
-for(int i=f;i<r;i++)
-{
-try
-{
-t.sleep(1000);
-}
-
-
-catch(Exception e){}
-System.out.print("\nLeaked Packet: "+q[i]);
-f++;
+sent=0;
+if(recv==-1)
+System.out.println(+i+"\t\t"+a[i]+"\tdropped\t"+sent+"\t"+buck_rem);
+else
+System.out.println(+i+"\t\t"+a[i]+"\t\t"+recv+"\t"+sent+"\t"+buck_rem);
 }
 }
-System.out.println();
-}
-
-}
-
-class LeakyBucket extends Thread
-{
-
-public static void main(String ar[]) throws Exception {
-
-Queue q=new Queue();
-Scanner src=new Scanner(System.in);
-System.out.println("\nEnter the packets to be sent:");
-int size=src.nextInt();
-q. insert(size);
-q.delete();
-}
-}
-
+}                                                                                                                                                                                                               	
