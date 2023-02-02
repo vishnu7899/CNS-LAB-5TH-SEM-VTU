@@ -1,57 +1,66 @@
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
-import java.lang.*;
-
-class RSAKeyGen
+import java.util.Random;
+public class RSA
 {
-public static void main(String[] args)
+private BigInteger p,q,N,phi,e,d;
+private int bitlength=1024;
+private Random r;
+public RSA()
 {
-
-Random rand1=new Random(System.currentTimeMillis()); 
-Random rand2=new Random(System.currentTimeMillis()*10);
-Scanner sc = new Scanner(System.in);
-System.out.println("Enter The public key");
-int pubkey=sc.nextInt();
-
-BigInteger p=BigInteger.probablePrime(32, rand1);
-BigInteger q=BigInteger.probablePrime(32, rand2);
-
-BigInteger n=p.multiply(q);
-
-BigInteger p_1=p.subtract(new BigInteger("1"));
-BigInteger q_1=q.subtract(new BigInteger("1"));
-
-BigInteger phi=p_1.multiply(q_1);
-
-while(true)
+r=new Random();
+p= BigInteger.probablePrime(bitlength,r);
+q= BigInteger.probablePrime(bitlength,r);
+System.out.println("Prime numbr p is"+p);
+System.out.println("Prime numbr q is"+q);
+N=p.multiply(q);
+phi=p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+e=BigInteger.probablePrime(bitlength/2,r);
+while(phi.gcd(e).compareTo(BigInteger.ONE)>0&&e.compareTo(phi)<0)
 {
-
-BigInteger GCD=phi.gcd(new BigInteger(""+pubkey)); 
-if(GCD.equals(BigInteger.ONE))
-
-{
-break;
+e.add(BigInteger.ONE);
 }
-pubkey++;
+System.out.println("Public key is:"+e);
+d=e.modInverse(phi);
+System.out.println("Private key is"+d);
 }
-BigInteger pubkey1=new BigInteger(""+pubkey);
-BigInteger prvkey=pubkey1.modInverse(phi);
-System.out.println("public key : "+pubkey1+","+n);
-System.out.println("private key : "+prvkey+","+n);
+public RSA(BigInteger e, BigInteger d, BigInteger N)
+{
+this.e=e;
+this.d=d;
+this.N=N;
+}
+public static void main(String[] args)throws IOException
+{
+RSA rsa =new RSA();
+DataInputStream in=new DataInputStream(System.in);
+String testString;
+System.out.println("Enter the plain text :");
+testString =in.readLine();
+System.out.println("Encrypting string :"+testString);
+System.out.println("String in bytes :"+bytesToString(testString.getBytes()));
+byte[] encrypted= rsa.encrypt(testString.getBytes());
+byte[] decrypted= rsa.decrypt(encrypted);
+System.out.println("Dcrypting Bytes:"+bytesToString(decrypted));
+System.out.println("Dcrypted String : "+new String(decrypted));
+}
+private static String bytesToString(byte[] encrypted)
+{
+String test =" ";
+for(byte b: encrypted)
+{
+test+=Byte.toString(b);
+}
+return test;
+}
+public byte[]encrypt(byte[]message)
+{
+return(new BigInteger(message).modPow(e,N).toByteArray());
+}
 
-System.out.println("Encryption and Decription\n Enter the message to pass");
-
-
-int asciiVal=sc.nextInt();
-
-BigInteger val=new BigInteger(""+asciiVal);
-
-BigInteger cipher=val.modPow(pubkey1,n); 
-System.out.println("Cipher text: " + cipher);
-
-BigInteger plainVal=cipher.modPow(prvkey,n); 
-int Val=plainVal.intValue();
-
-System.out.println("Plain text:" + plainVal);
+public byte[]decrypt(byte[]message)
+{
+return(new BigInteger(message).modPow(d,N).toByteArray());
 }
 }
